@@ -131,4 +131,40 @@ median(total_steps_filled_df$totalsteps)
 ```
 ## [1] 10766.19
 ```
+**What is the impact of imputing missing data on the estimates of the total daily number of steps?** The impact to the mean and median are low.
+
 ## Are there differences in activity patterns between weekdays and weekends?
+### 1. Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+
+```r
+weekcategory <- function(date) {
+    
+    dayofweek <- weekdays(as.Date(date))
+    
+    if(dayofweek %in% c("Saturday", "Sunday")) {
+        "weekend"
+    }
+    else {
+        "weekday"
+    }
+}
+
+activity_week_cat <- sapply(activity_filled_df$date, weekcategory)
+activity_filled_df$weekcategory <- as.factor(activity_week_cat)
+```
+
+### 2. Make a panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). 
+
+```r
+interval_steps_week_cat_group <- group_by(activity_filled_df, interval, weekcategory)
+interval_steps_week_cat_df <- summarise(interval_steps_week_cat_group, avgsteps = mean(steps))
+
+ggplot(data=interval_steps_week_cat_df, aes(x=interval, y=avgsteps)) +
+    facet_grid(weekcategory ~ .) + 
+    geom_line(color="blue") +
+    labs(x="Interval", 
+         y="Average number of steps", 
+         title="Average number of steps by interval")
+```
+
+![](PA1_template_files/figure-html/plotWeekCategory-1.png)<!-- -->
